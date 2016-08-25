@@ -30,7 +30,7 @@ void ReverseXAxis (TH1 *h)
 }
 
 
-void DumpPlots(TString inputFileName, TString outputFolder) {
+void DumpPlotsReco(TString inputFileName, TString outputFolder, Int_t runNumber) {
   gStyle->SetOptStat(0);
   //gStyle->SetOptTitle(0);
 
@@ -71,7 +71,7 @@ void DumpPlots(TString inputFileName, TString outputFolder) {
     ReverseXAxis(Overview_Rechits_Layer);
     // if(iii != 0) sprintf(dirname,"/afs/cern.ch/work/r/rchatter/CMSSW_7_6_3_patch2/src/HGCal/DQM_Plots/Run%i/Spill%i/Overview/FullLayer_RecHits_Layer%i.png",iii,jjj,layerCounter);
     // else sprintf(dirname,"/afs/cern.ch/work/r/rchatter/CMSSW_7_6_3_patch2/src/HGCal/DQM_Plots/Cumulative/Overview/FullLayer_RecHits_Layer%i.png",layerCounter);
-    outputPlotName = (outputFolder + Form("/Overview/")) + histogramName + Form(".png");
+    outputPlotName = (outputFolder + Form("/Overview/")) + histogramName + Form("_%06d.png", runNumber);
     c1->SaveAs(outputPlotName);
     delete Overview_Rechits_Layer;
 
@@ -83,7 +83,7 @@ void DumpPlots(TString inputFileName, TString outputFolder) {
     ReverseXAxis(Overview_Occupancy_Layer);
     // if(iii != 0) sprintf(dirname,"/afs/cern.ch/work/r/rchatter/CMSSW_7_6_3_patch2/src/HGCal/DQM_Plots/Run%i/Spill%i/Overview/FullLayer_Occupancy_Layer%i.png",iii,jjj,layerCounter);
     // else sprintf(dirname,"/afs/cern.ch/work/r/rchatter/CMSSW_7_6_3_patch2/src/HGCal/DQM_Plots/Cumulative/Overview/FullLayer_Occupancy_Layer%i.png",layerCounter);
-    outputPlotName = (outputFolder + Form("/Overview/")) + histogramName + Form(".png");
+    outputPlotName = (outputFolder + Form("/Overview/")) + histogramName + Form("_%06d.png", runNumber);
     c1->SaveAs(outputPlotName);
     delete Overview_Occupancy_Layer;
     
@@ -92,7 +92,7 @@ void DumpPlots(TString inputFileName, TString outputFolder) {
     Overview_Rechits_Layer_Summed->Draw();
     // if(iii != 0) sprintf(outputPlotName,"/afs/cern.ch/work/r/rchatter/CMSSW_7_6_3_patch2/src/HGCal/DQM_Plots/Run%i/Spill%i/Overview/FullLayer_RecHits_Layer%i_Summed.png",iii,jjj,layerCounter);
     // else sprintf(outputPlotName,"/afs/cern.ch/work/r/rchatter/CMSSW_7_6_3_patch2/src/HGCal/DQM_Plots/Cumulative/Overview/FullLayer_RecHits_Layer%i_Summed.png",layerCounter);
-    outputPlotName = (outputFolder + Form("/Overview/")) + histogramName + Form(".png");
+    outputPlotName = (outputFolder + Form("/Overview/")) + histogramName + Form("_%06d.png", runNumber);
     c1->SaveAs(outputPlotName);
     delete Overview_Rechits_Layer_Summed;
 	
@@ -103,7 +103,7 @@ void DumpPlots(TString inputFileName, TString outputFolder) {
         TH1F* Cell_Hist_U_V  = (TH1F*) inputFile->FindObjectAny(histogramName);
         // if(iii != 0) sprintf(outputPlotName,"/afs/cern.ch/work/r/rchatter/CMSSW_7_6_3_patch2/src/HGCal/DQM_Plots/Run%i/Spill%i/Detailed/Cell_RecHits_u_%i_v_%i_Layer_%i.png",iii,jjj,iu,iv,layerCounter);
         // else sprintf(outputPlotName,"/afs/cern.ch/work/r/rchatter/CMSSW_7_6_3_patch2/src/HGCal/DQM_Plots/Cumulative/Detailed/Cell_RecHits_u_%i_v_%i_Layer_%i.png",iu,iv,layerCounter);
-        outputPlotName = (outputFolder + Form("/Detailed/")) + histogramName + Form(".png");
+        outputPlotName = (outputFolder + Form("/Detailed/")) + histogramName + Form("_%06d.png", runNumber);
         Cell_Hist_U_V->Draw();
         c1->SaveAs(outputPlotName);
         delete Cell_Hist_U_V;

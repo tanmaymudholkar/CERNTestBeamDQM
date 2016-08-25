@@ -5,10 +5,14 @@ from __future__ import print_function, division
 import os, re, time, subprocess, glob
 
 cmsswSource = "/hgcaldata/PromptFeedback/CMSSW_8_0_17/src/HGCal"
-dataFolder = "/hgcaldata/PromptFeedback/testInput" # Important to NOT have a trailing slash
+dataFolder = "/hgcaldata/data" # Important to NOT have a trailing slash
 outputFolder = "/hgcaldata/PromptFeedback/testOutput" # Important to NOT have a trailing slash
+# dqmPlotsRecoFolder = "/hgcaldata/PromptFeedback/DQMPlots_Reco"
+# dqmPlotsDigiFolder = "/hgcaldata/PromptFeedback/DQMPlots_Digi"
+dqmPlotsFolder = "/var/www/html/dqm"
 # commonPrefix = "Ped_Output"
 chainSequence = 3
+nSpills = 6
 pedestalsHighGain = "%s/CondObjects/data/Ped_HighGain_OneLayer_H2CERN.txt"%(cmsswSource)
 pedestalsLowGain = "%s/CondObjects/data/Ped_LowGain_OneLayer_H2CERN.txt"%(cmsswSource)
 pathToProcessingStatusLogger = "%s/hgcalDQMProcessingStatusLog"%(outputFolder)
@@ -17,7 +21,7 @@ listOfRunsAlreadyProcessed = []
 latestListOfRunsInDataFolder = []
 latestTypesOfRunsInDataFolder = {} # empty dictionary
 listOfRunsToProcess = []
-sleepTime = 5
+sleepTime = 60
 
 def initiateListOfRunsAlreadyProcessed():
     global listOfRunsAlreadyProcessed
@@ -72,19 +76,26 @@ if __name__ == "__main__":
             # subprocess.call("bash runhgcalDQMHelper.sh %s %d %s"%(DQMHelperOptions, runToProcess, pathToScriptLogger), shell=True)
             if (runTypeToProcess == "PED"):
                 chainSequence = 1
+                nSpills = 6
                 pedestalsHighGain = "%s/Ped_HighGain_OneLayer_%06d.txt"%(outputFolder, runToProcess)
                 pedestalsLowGain = "%s/Ped_LowGain_OneLayer_%06d.txt"%(outputFolder, runToProcess)
             elif (runTypeToProcess == "HGCRun"):
                 chainSequence = 3
+                nSpills = 34
                 pedestalsHighGain = "%s/CondObjects/data/Ped_HighGain_OneLayer_H2CERN.txt"%(cmsswSource)
                 pedestalsLowGain = "%s/CondObjects/data/Ped_LowGain_OneLayer_H2CERN.txt"%(cmsswSource)
+
             if (runTypeToProcess == "PED" or runTypeToProcess == "HGCRun"):
-                cmsswArguments = "print dataFolder=%s outputFolder=%s runNumber=%d runType=%s chainSequence=%d pedestalsHighGain=%s pedestalsLowGain=%s"%(dataFolder, outputFolder, runToProcess, runTypeToProcess, chainSequence, pedestalsHighGain, pedestalsLowGain)
+                cmsswArguments = "print dataFolder=%s outputFolder=%s runNumber=%d runType=%s chainSequence=%d nSpills=%d pedestalsHighGain=%s pedestalsLowGain=%s"%(dataFolder, outputFolder, runToProcess, runTypeToProcess, chainSequence, nSpills, pedestalsHighGain, pedestalsLowGain)
                 print ("For run number %d, runTypeToProcess = %s and cmsswArguments = %s"%(runToProcess, runTypeToProcess, cmsswArguments))
                 # subprocess.call("bash runhgcalDQMHelper.sh %s %d %s %d %s %s"%(DQMHelperOptions, runToProcess, runTypeToProcess, chainSequence, pedestalsHighGain, pedestalsLowGain), shell=True)
                 # cmsRunCommand = "bash runhgcalDQMHelper.sh %s %s"%(cmsswSource, cmsswArguments)
                 # print ("About to execute %s"%(executeCommand))
-                subprocess.call("cd %s && eval `scram runtime -sh` && cmsRun %s/test_cfg.py %s && cd -"%(cmsswSource, cmsswSource, cmsswArguments), shell=True)
+                subprocess.call("cd %s && eval `scram runtime -sh` && cmsRun test_cfg.py %s && cd -"%(cmsswSource, cmsswArguments), shell=True)
+                if (runTypeToProcess == "HGCRun"):
+                    subprocess.call("cd %s && eval `scram runtime -sh` && cd - && root -b -q \"DumpPlotsReco.C++(\\\"%s/HGCRun_Output_%06d_Reco.root\\\", \\\"%s\\\", %d)\""%(cmsswSource, outputFolder, runToProcess, dqmPlotsFolder, runToProcess), shell=True)
+                elif (runTypeToProcess == "PED"):
+                    subprocess.call("cd %s && eval `scram runtime -sh` && cd - && root -b -q \"DumpPlotsDigi.C++(\\\"%s/PED_Output_%06d_Digi.root\\\", \\\"%s\\\", %d)\""%(cmsswSource, outputFolder, runToProcess, dqmPlotsFolder, runToProcess), shell=True)
             else:
                 print ("Only runtypes PED and HGCRun supported for now")
             listOfRunsAlreadyProcessed += [runToProcess]
